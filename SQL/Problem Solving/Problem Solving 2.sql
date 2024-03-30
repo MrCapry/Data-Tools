@@ -1,7 +1,7 @@
 ﻿
 -- Problems Link: https://www.slideshare.net/imamhossain75054/dbms-5-mysql-practice-list-hr-schema
 
--- LIKE/NOT LIKE wildcards
+  -- LIKE/NOT LIKE wildcards
 
 SELECT employee_id,first_name,last_name FROM employees
 WHERE 1=1
@@ -180,8 +180,10 @@ min(j.min_salary) FROM employees e
 JOIN jobs j
 ON e.job_id = j.job_id;
 
+
 SELECT count(employee_id) FROM employees
 WHERE manager_id = 114;
+
 
 SELECT count(distinct employee_id) FROM employees;
 
@@ -260,6 +262,7 @@ ORDER BY "Letter"; -- it is case sensitive
   -- Same as Recursive CTE
   -- CONNECT and LEVEL BY for Oracle
   -- It is also called hierarchical Queries
+
 CREATE TABLE letters_table AS
 SELECT CHR(64 + LEVEL) AS letter
 FROM DUAL
@@ -557,6 +560,7 @@ WHERE salary = (SELECT max(salary ) FROM employees);
 
 -- Min Employee Checker
 
+
 SELECT
 e.employee_id,
 e.first_name || ' '|| e.last_name "Employee Name",
@@ -585,10 +589,6 @@ order BY Cnt ASC;
 
 SELECT * FROM employees
 WHERE hire_date = (SELECT min(hire_date) FROM employees);
-
-
-
-
 
 
 
