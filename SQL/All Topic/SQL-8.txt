@@ -1,0 +1,145 @@
+
+-- Outer Joins
+-- FULL, LEFT, RIGHT --> writing OUTER is optional
+SELECT * FROM sales
+WHERE customer_id = 'ID51';
+
+SELECT * FROM customers;
+
+SELECT * FROM sales s
+FULL JOIN customers c
+ON s.customer_Id = c.customer_id
+WHERE c.customer_id='ID51';
+
+
+SELECT
+e.first_name,
+e.last_name,
+department_id,
+department_name
+FROM employees e
+LEFT JOIN departments d
+USING(department_id)
+ORDER BY department_id ASC NULLS FIRST;
+
+
+SELECT
+e.first_name,
+e.last_name,
+d.department_id,
+d.department_name
+FROM employees e
+LEFT OUTER JOIN departments d
+ON e.department_id = d.department_id;
+
+-- duplicated values examples
+
+SELECT
+d.department_id,
+d.department_name,
+e.department_id
+FROM departments d
+JOIN employees e
+ON d.department_id = e.department_id
+ORDER BY d.department_id;
+
+
+SELECT
+d.department_id,
+d.department_name,
+e.department_id
+FROM departments d
+LEFT OUTER JOIN employees e
+ON d.department_id = e.department_id
+ORDER BY d.department_id DESC;
+
+-- RIGHT JOIN
+
+SELECT
+e.first_name,
+e.last_name,
+d.department_id,
+d.department_name
+FROM employees e
+RIGHT JOIN departments d
+ON e.department_id = d.department_id;
+
+SELECT 
+e.first_name,
+e.last_name,
+d.department_id,
+d.department_name
+FROM departments d
+LEFT JOIN employees e
+ON e.department_id = d.department_id;
+
+
+-- Left Join with Right Join
+
+SELECT
+e.first_name,
+e.last_name,
+e.department_id,
+d.department_id,
+d.department_name,
+d.location_id,
+l.location_id
+FROM employees e
+RIGHT JOIN departments d
+ON d.department_id = e.department_id
+RIGHT JOIN locations l 
+ON l.location_id = d.location_id;
+
+SELECT
+e.first_name,
+e.last_name,
+e.department_id,
+d.department_id,
+d.department_name,
+d.location_id,
+l.location_id
+FROM employees e
+RIGHT JOIN departments d
+ON d.department_id = e.department_id
+LEFT JOIN locations l 
+ON l.location_id = d.location_id;
+
+
+-- Inner Join
+SELECT
+e.first_name,
+e.last_name,
+e.department_id,
+d.department_id,
+d.department_name,
+d.location_id,
+l.location_id
+FROM employees e
+RIGHT JOIN departments d
+ON d.department_id = e.department_id
+JOIN locations l 
+ON l.location_id = d.location_id;
+
+
+-- FULL OUTER JOIN
+
+SELECT
+d.location_id,
+l.location_id
+FROM departments d
+FULL JOIN locations l
+ON d.location_id = l.location_id;
+
+SELECT
+e.first_name,
+e.last_name,
+e.department_id,
+d.department_id,
+d.department_name
+FROM employees e
+FULL JOIN departments d
+ON e.department_id = d.department_id;
+
+
+
+

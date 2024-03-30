@@ -1,0 +1,22 @@
+SQL(1) - SELECT, WHERE, IN, ANY, Order, ALL, LIKE, NULL, Distinct, AS, NULLS First, NULLS Last, Wildcards, RowNum, RowId, Offset, Fetch
+SQL(2) - Lower, Upper, InitCap, Length, Substr, Concat, Instr,TRIM, LTRIM, RTRIM, Replace, lpad, rpad, round, mod, ceil,floor 
+         Trunc, Sysdate, SessionTimeZone, Current_timeStamp,SystemStamp
+	 Add_months, Months_between, Extract, Next_day
+SQL(3) - To_Char, To_Number, To_Date, Cast, NVL, NVL2,NULLIF,Coalesce
+SQL(4) - Case,Decode, AVG(All ..),AVG(Distinct,All), ListAgg,  Min, Max, Average, SUM, Count(*),STDDEV,MEDIAN
+SQL(5) - GROUP BY, Having, Aggregation over Aggregation
+SQL(6) - Joining Tables - Natural, Using, Inner,Outer,EquiJoin, Non-Equijoin, Self Join,Cross Join
+SQL(7) - Restrincting Joins, Playing with Joins
+SQL(8) - Outer Joins Deeply (Left, Right, Full)
+SQL(9) - Cross Join, Joins with Old Syntax, 4 General Types of Joins: Inner non-Equijoin ...
+SQL(10) - SubQueries: Single Row, Multiple Row, Multiple Column, All, Any, NonPairWise, PariWise, Scalar Subquery, Correlated SubQuery,
+          EXISTS, NOT EXISTS
+SQL(11) - DDL (Data Definition Language)- Create,Alter,Drop,Truncate,Comment,Rename
+SQL(12) - Set Operators - UNION, UNION ALL, MINUS, INTERCECT
+SQL(13) - DML (Data Manipulation Language)- Select,Insert, Update, Delete, Truncate, Merge, Commit, RollBack
+              SavePoint, For Update,Wait, NoWait, Skip Locked
+SQL(14) - Views, Complex Views, Create or Replace, With Check Option, With Read Only, Drop Views
+SQL(15) - Data Dictionary Views: User_Objects, User_Tables, User_views,User_Objects, All_Tables, Comments, Constraints
+SQL(16) - Window Functions, Partition by, Order by, Over(), Rows Beteen preceding ... , Row_Number(),rank(),Dense_rank()
+	lag,lead,First_value,Last_value.
+SQL(17) - ESCAPE, AGG OVER AGG, ROLLUP, CUBE, CTE, PIVOT, VIEWS
