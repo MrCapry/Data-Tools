@@ -7,7 +7,7 @@
 -- substr, length, concat, instr, trim, replace, [lpad,rpad]
 
 
-SELECt
+SELECT
 customer_id,
 name,
 gender,
