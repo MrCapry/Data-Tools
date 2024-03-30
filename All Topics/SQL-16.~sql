@@ -1,0 +1,265 @@
+
+SELECT * FROM sales;
+
+         
+-- for entire
+SELECT t.*, (SELECT count(*) FROM Sales) FROM sales t;
+
+-- by game id
+
+-- correlated subQuery
+SELECT t.*, 
+(SELECT count(*) FROM sales WHERE game_id =t.game_id ) cnting,
+(SELECT sum(sales_units) FROM sales WHERE game_id =t.game_id ) suming
+FROM sales t;
+
+-- multiple criteria
+SELECT t.*,
+(SELECT count(*) FROM sales WHERE game_id = t.game_id AND customer_id = t.customer_id )
+FROM sales t
+ORDER BY t.customer_id ASC, t.game_id ASC;
+
+SELECT count(*) FROM sales;
+SELECT count(*) OVER() FROM sales; 
+
+SELECT s.*, count(*) OVER() Total_count FROM sales s;
+
+-- () inside it we specify window
+
+SELECT s.*, 
+count(*) OVER(PARTITION BY game_id) Counting_Game,
+sum(sales_units) OVER(PARTITION BY customer_id) SumingSales_Customer,
+sum(sales_units) OVER(PARTITION BY customer_id,game_id) multiple, -- multiple criteria
+max(order_date) OVER(PARTITION BY game_id) Mx_date
+FROM sales s
+ORDER BY game_id;
+
+-- in grouping
+
+SELECT 
+game_id,
+customer_id,
+sum(sales_units),
+count(*) OVER() Cning, 
+(SELECT sum(sales_units) FROM sales WHERE game_id = s.game_id) AS Partgr1,
+--sum(sales_units) OVER(PARTITION BY game_id) AS Partgr2 
+SUM(SUM(sales_units)) OVER(PARTITION BY game_id) AS Partgr2 -- Grouping + Partition Example
+FROM sales s
+group by
+game_id, customer_id
+ORDER BY game_id;
+
+
+-- Cumulative Totals
+SELECT 
+s.*, 
+sum(sales_units) OVER(ORDER BY sales_date DESC,order_date ) Cumulative,
+count(*) OVER(ORDER BY sales_date DESC) Indexing, --       (  ,  )
+FROM sales s
+Order By s.sales_date DESC;
+
+-- cumulative sales by game_id
+SELECT 
+game_id,
+customer_id,
+sales_date,
+sales_units,
+sum(sales_units) OVER(PARTITION BY game_id ORDER BY sales_date ASC) AS GameCumulative
+FROM sales
+ORDER BY game_id,sales_date ASC;
+
+
+-- Order by with multiple Criteria
+SELECT 
+game_id,
+customer_id,
+sales_date,
+order_date,
+sales_units,
+sum(sales_units) OVER(PARTITION BY game_id ORDER BY order_date ASC,sales_date ASC) AS GameCumulative
+FROM sales
+ORDER BY game_id,order_date ASC,sales_date ASC;
+
+
+-- Everything together
+  -- Nice Bro
+SELECT 
+last_day(sales_date) EOM,
+game_id,
+customer_id,
+sum(sales_units) sales,
+sum(sum(sales_units)) Over(PARTITION BY game_id) AS Grp_Gmae,
+sum(sum(sales_units)) OVER(PARTITION BY game_id,customer_id Order BY last_day(sales_date),game_id ASC, customer_id ASC) 
+AS Cum_Cust_Game
+FROM sales
+  GROUP BY
+  last_day(sales_date),
+  game_id,
+  customer_id
+  ORDER BY game_id ASC, customer_id ASC,last_day(sales_date);
+
+-- SQL puts: range between unbounded preceding and current row by deafult after ORDER BY (in Over() ) statement
+       -- Can be change with: rows between unbounded preceding and current row 
+       
+SELECT 
+game_id,
+order_date,
+sales_units,
+sum(sales_units) OVER(ORDER BY order_date ASC range between unbounded preceding and current row)  Cum1,
+sum(sales_units) OVER(ORDER BY order_date ASC rows between unbounded preceding and current row) Cum2 -- sorts by some criteria
+FROM sales
+ORDER BY game_id ASC, order_date;
+
+
+-- Sliding Windows
+  -- Moving Averages
+
+SELECT 
+employee_id,
+salary,
+sum(salary) OVER(ORDER BY employee_id ASC) Cum,
+sum(salary) OVER(ORDER BY employee_id ASC rows between 1 preceding and current row) Current_Prev, -- previous row and current row
+sum(salary) OVER(ORDER BY employee_id  ASC rows between unbounded preceding and current row) "Unbounded",
+max(salary) OVER(ORDER BY employee_id  ASC) AS "Max1",
+max(salary) OVER(ORDER BY salary  ASC) AS "Max2"
+FROM employees
+ORDER BY salary ASC;
+  
+-- Moving Averages
+
+SELECT
+last_day(sales_date) EOM,
+sum(sales_units) sales,
+round(avg(sales_units),2) average,
+sum(sum(sales_units)) OVER(ORDER BY last_day(sales_date) ASC rows between 3 preceding and current row) Moving_Sum,
+round(sum(avg(sales_units)) OVER(ORDER BY last_day(sales_date) ASC rows between 3 preceding and current row),2) Moving_Avg_Incorrect,
+round(avg(sum(sales_units)) OVER(ORDER BY last_day(sales_date) ASC rows between 3 preceding and current row),2) Moving_Avg_Correct
+FROM sales
+GROUP by last_day(sales_date)
+ORDER BY EOM ASC;
+
+
+
+SELECT * FROM 
+(SELECT 
+ Employee_id,
+ salary,
+ sum(salary) OVER(ORDER BY salary ASC) CUM
+ FROM employees)
+ WHERE cum>20000;
+
+  -- Window Function results are being calculated after where clause
+
+-- RANK, DENSE, LEAD, LAG
+
+SELECT 
+sales_date,
+sales_units,
+row_number() OVER (ORDER BY sales_units ASC) RW,
+rank() OVER (ORDER BY sales_units ASC) RNK,
+dense_rank() OVER (ORDER BY sales_units ASC) den
+FROM sales;
+
+-- COMMIT makes change permanent
+
+ -- Row Number Examples
+SELECT 
+employee_id,
+salary,
+   row_number() OVER (ORDER BY salary ASC) RW1,
+   row_number() OVER (ORDER BY salary ASC,employee_id ASC) RW2, 
+   row_number() OVER (ORDER BY employee_id ASC) RW3
+   FROM employees
+   ORDER BY RW3 ASC;
+
+-- Ranking + Removeing Filters FROM Game_id
+
+SELECT
+sales_date,
+game_id,
+sales_units,
+row_number() OVER(PARTITION BY game_id ORDER BY sales_date) RW1,
+row_number() OVER(PARTITION BY game_id ORDER BY sales_units DESC) RW2,
+rank() OVER(PARTITION BY game_id ORDER BY sales_units) RNK1,
+dense_rank() OVER(PARTITION BY game_id ORDER BY sales_units) RNK2
+FROM sales 
+ORDER BY game_id,sales_units DESC;
+
+-- Ranking + Grouping
+   -- Cool, you can any ranking based on this example
+SELECT
+last_day(sales_date) EOM,
+game_id,
+sum(sales_units) sales,
+  row_number() OVER(ORDER BY game_id ASC) RW1,
+  row_number() OVER(ORDER BY last_day(sales_date) ASC) RW2,
+  row_number() OVER(PARTITION BY game_id ORDER BY last_day(sales_date) ASC) RW3, 
+  row_number() OVER(PARTITION BY game_id ORDER BY sum(sales_units) ASC) RW3
+FROM sales
+GROUP by 
+last_day(sales_date),
+game_id
+ORDER BY game_id ASC,sales ASC;
+
+-- LAG and LEAD functions
+ -- LAG - Previous Value, LEAD - Next Value
+SELECT
+employee_id,
+salary,	
+LAG(employee_id) OVER (ORDER BY employee_id) Prev_id,
+LEAD(employee_id) OVER (ORDER BY employee_id) Next_id,
+LAG(salary) OVER (ORDER BY employee_id) Prev_sar,
+LEAD(salary) OVER (ORDER BY employee_id) Next_sar
+FROM employees
+ORDER BY employee_id ASC;
+
+-- another examples
+SELECT
+sales_date,
+game_id,
+LAG(sales_date) OVER(ORDER BY sales_date) lg1,
+LEAD(game_id) OVER(ORDER BY sales_date) ld1
+FROM sales
+ORDER BY sales_date ASC;
+
+-- With partition
+SELECT
+sales_date,
+game_id,
+sales_units,
+LAG(sales_units) OVER(PARTITION BY game_id ORDER BY sales_date) lg1
+FROM sales
+ORDER BY game_id ASC, sales_date ASC;
+
+-- With Grouping
+SELECT
+last_day(sales_date) EOM,
+game_id,
+sum(sales_units) sales,
+LAG(sum(sales_units)) OVER(ORDER BY last_day(sales_date)) lg1, -- without partition
+LAG(sum(sales_units)) OVER(PARTITION BY game_id ORDER BY last_day(sales_date)) lg2 -- with partition, NULL after changing Game_id
+FROM sales
+group by
+last_day(sales_date),
+game_id
+ORDER BY game_id,EOM ASC;
+
+
+-- First_value and Last_value
+   -- First_value is perceted entirely and last_value row by row
+   
+SELECT 
+s.*, 
+first_value(sales_date) OVER (ORDER BY sales_date) fir,
+last_value(sales_date) OVER (ORDER BY sales_date) lst1,
+last_value(sales_date) OVER (ORDER BY sales_date range between current row and unbounded following) lst2,
+first_value(sales_date) OVER (PARTITION BY game_id ORDER BY sales_date) lst3
+FROM sales s
+ORDER BY game_id;
+
+
+
+
+
+
+

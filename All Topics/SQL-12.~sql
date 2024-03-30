@@ -1,0 +1,215 @@
+
+-- Set Operators
+
+-- UNION,UNION ALL MINUS, INTERSECT
+
+SELECT distinct(game_name),'Game' AS "Type" FROM games
+UNION
+SELECT distinct(name),'Customer' FROM customers;
+
+-- returns unique values
+SELECT count(*) FROM 
+(SELECT last_day(sales_date) FROM sales
+  UNION 
+  SELECT last_day(order_date) FROM sales);
+
+-- all (4,000) rows
+SELECT count(*) FROM 
+(SELECT last_day(sales_date) FROM sales
+  UNION ALL
+  SELECT last_day(order_date) FROM sales);
+
+
+-- excecuted Top to bottom, can be change with ()
+-- N of columns and data types should be matched
+-- order by can be used only once (at the end)
+-- all set opretors removes duplicate rows, except UNION ALL
+-- column names comes FROM first table
+-- diffrence between SET operators and Joins
+
+
+CREATE TABLE retired_employees AS 
+SELECT * FROM employees WHERE job_id = 'IT_PROG' AND ROWNUM <5;
+
+INSERT INTO retired_employees(employee_id, first_name, last_name, salary, email, phone_number, hire_date, job_id,commission_pct, manager_id, department_id)
+VALUES (1,'Larry', 'McCain', 30000, 'LMCCAIN', '951.742.6792', '24-MAR-96','AD_PRES', '0.5', NULL, 90);
+
+INSERT INTO retired_employees(employee_id, first_name, last_name, salary, email, phone_number, hire_date, job_id,commission_pct, manager_id, department_id)
+VALUES (2, 'Mary', 'Walker', 9000, 'MWALKER', '314.680.1441', '13-SEP-99', 'SA_REP', '0.2', 1, 80);
+
+
+-- Eliminated duplicates
+SELECT * FROM retired_employees
+UNION
+SELECT * FROM employees;
+
+SELECT * FROM retired_employees
+UNION ALL
+SELECT * FROM employees;
+
+SELECT * FROM retired_employees
+UNION
+SELECT * FROM employees
+WHERE job_id = 'IT_PROG';
+
+
+SELECT first_name, last_name, email, hire_date, salary  FROM retired_employees
+UNION
+SELECT first_name, last_name, email, hire_date, salary FROM employees;
+
+-- removes duplicates values FROM all queries 
+SELECT job_id FROM retired_employees
+UNION
+SELECT job_id FROM employees WHERE department_id = 80;
+
+-- UNION works slowely than UNION ALL
+
+   -- Intersect
+
+
+SELECT first_name, last_name, email, hire_date, salary, job_id  FROM retired_employees
+INTERSECT
+SELECT first_name, last_name, email, hire_date, salary, job_id FROM employees;
+
+-- Minus
+-- Exists first query but not in second
+-- order of queries is important
+-- duplicates are removed
+
+SELECT first_name, last_name, email, hire_date, salary, job_id  FROM retired_employees
+MINUS
+SELECT first_name, last_name, email, hire_date, salary, job_id FROM employees;
+
+-- changing queries order
+SELECT first_name, last_name, email, hire_date, salary, job_id FROM employees
+MINUS
+SELECT first_name, last_name, email, hire_date, salary, job_id  FROM retired_employees;
+
+-- can be used for one column, ....
+SELECT first_name FROM employees
+MINUS
+SELECT first_name FROM retired_employees;
+
+
+-- matching unmatched N of columns
+
+   -- NULLs are used for that circumstance
+SELECT job_id, department_id, first_name, last_name FROM employees
+UNION ALL
+SELECT job_id, department_id, NULL, NULL FROM job_history;
+
+SELECT job_id, NULL department_id, first_name, last_name FROM employees
+UNION ALL
+SELECT job_id, department_id, NULL, NULL FROM job_history;
+
+SELECT job_id, 0 department_id, first_name, last_name FROM employees
+UNION ALL
+SELECT job_id, department_id, NULL, NULL FROM job_history;
+
+
+-- With order By
+
+-- sorts all the results
+SELECT first_name, last_name, salary, department_id FROM employees
+UNION
+SELECT first_name, last_name, salary, department_id FROM retired_employees
+ORDER BY salary;
+
+SELECT first_name, last_name, salary, department_id FROM employees
+UNION ALL
+SELECT first_name, last_name, salary, department_id FROM employees WHERE department_id = 30
+UNION
+SELECT first_name, last_name, salary, department_id FROM retired_employees
+ORDER BY salary;
+
+
+SELECT first_name, last_name, salary, department_id FROM employees
+UNION ALL
+SELECT first_name, last_name, salary, department_id FROM employees WHERE department_id = 30
+UNION
+SELECT first_name, last_name, salary s, department_id FROM retired_employees
+ORDER BY salary DESC;
+
+
+SELECT first_name, last_name, salary, department_id FROM employees
+UNION ALL
+SELECT first_name, last_name, salary s, department_id FROM employees WHERE department_id = 30
+UNION
+SELECT first_name, last_name, salary, department_id FROM retired_employees
+ORDER BY salary DESC;
+
+SELECT first_name, last_name, salary s, department_id FROM employees
+UNION ALL
+SELECT first_name, last_name, salary, department_id FROM employees WHERE department_id = 30
+UNION
+SELECT first_name, last_name, salary, department_id FROM retired_employees
+ORDER BY s DESC;
+
+
+SELECT first_name, last_name, salary s, department_id FROM employees
+UNION ALL
+SELECT first_name, last_name, salary s, department_id FROM employees WHERE department_id = 30
+UNION
+SELECT first_name, last_name, salary, department_id FROM retired_employees
+ORDER BY s DESC;
+
+-- default sort is ascending by first column of first squery
+
+
+  -- Combining multiple set Operators
+  -- Top to Bottom, can be changes with ()
+  -- order by should not be written in any ()
+
+ -- UNION ALL and UNION
+SELECT first_name, last_name, salary, department_id FROM employees
+UNION ALL
+SELECT first_name, last_name, salary, department_id FROM employees WHERE department_id = 30
+UNION
+SELECT first_name, last_name, salary, department_id FROM retired_employees
+ORDER BY salary;
+
+-- UNION ALL and MINUS
+SELECT first_name, last_name, salary, department_id FROM employees
+UNION ALL
+SELECT first_name, last_name, salary, department_id FROM employees WHERE department_id = 30
+MINUS
+SELECT first_name, last_name, salary, department_id FROM retired_employees
+ORDER BY salary;
+
+-- MINUS and INTERSECT
+SELECT first_name, last_name, salary, department_id FROM employees
+MINUS
+SELECT first_name, last_name, salary, department_id FROM employees WHERE department_id = 30
+INTERSECT
+SELECT first_name, last_name, salary, department_id FROM retired_employees
+ORDER BY salary;
+
+-- Changing order 
+SELECT first_name, last_name, salary, department_id FROM employees
+MINUS
+(SELECT first_name, last_name, salary, department_id FROM employees WHERE department_id = 30
+INTERSECT
+SELECT first_name, last_name, salary, department_id FROM retired_employees)
+ORDER BY salary;
+
+-- Order by can't be used inside ()
+SELECT first_name, last_name, salary, department_id FROM employees
+MINUS
+(SELECT first_name, last_name, salary, department_id FROM employees WHERE department_id = 30
+INTERSECT
+SELECT first_name, last_name, salary, department_id FROM retired_employees
+ORDER BY salary);
+
+
+(SELECT first_name, last_name, salary, department_id FROM employees
+MINUS
+SELECT first_name, last_name, salary, department_id FROM employees WHERE department_id = 30
+INTERSECT
+SELECT first_name, last_name, salary, department_id FROM retired_employees)
+ORDER BY salary;
+
+
+
+
+
+
